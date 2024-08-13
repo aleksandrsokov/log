@@ -26,4 +26,17 @@
       - regex: input(type="imtcp" port="514")
         replace: input(type="imtcp" port="514")
     when: ansible_hostname == "log" 
+
+  - name: add lines in /etc/rsyslog.conf
+    blockinfile:
+      path: /etc/rsyslog.conf
+      block: |
+        $template RemoteLogs,"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log"
+        *.* ?RemoteLogs
+    when: ansible_hostname == "log" 
+
+  - name: restart rsyslog service
+    service: rsyslog
+    state: restarted
+    when: ansible_hostname == "log"
       
