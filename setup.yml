@@ -17,13 +17,13 @@
       regex: '^#\s*{{ item.regex }}(.*)$'
       line: '{{ item.replace }}'
     loop:
-      - regex: module\(load="imudp"\)
+      - regex: module(load="imudp")
         replace: module(load="imudp")
-      - regex: input\(type="imudp" port="514"\)
+      - regex: input(type="imudp" port="514")
         replace: input(type="imudp" port="514")
-      - regex: module\(load="imtcp"\)
+      - regex: module(load="imtcp")
         replace: module(load="imtcp")
-      - regex: input\(type="imtcp" port="514"\)
+      - regex: input(type="imtcp" port="514")
         replace: input(type="imtcp" port="514")
     when: ansible_hostname == "log" 
       
