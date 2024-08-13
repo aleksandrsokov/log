@@ -12,7 +12,7 @@
     when: ansible_hostname == "web"
 
   - name: edit /etc/rsyslog.conf
-    replace:
+    lineinfile:
       dest: /etc/rsyslog.conf
       regex: '^#\s*{{ item.regex }}(.*)$'
       line: '{{ item.replace }}'
