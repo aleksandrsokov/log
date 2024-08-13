@@ -13,9 +13,9 @@
 
   - name: edit /etc/nginx/nginx.conf
     lineinfile:
-      dest:
+      dest: /etc/nginx/nginx.conf
       insertafter: 'error_log /var/log/nginx/error.log;'
-      line: {{ item }}
+      line: "{{ item }}"
     loop: 
       - error_log syslog:server=192.168.0.182:514,tag=nginx_error;
       - access_log syslog:server=192.168.0.182:514,tag=nginx_access,severity=info combined;
