@@ -24,6 +24,21 @@ Vagrant.configure(2) do |config|
    
  end
 
+ config.vm.define "web2" do |web2|
+   web2.vm.network "public_network", ip: "192.168.0.183"
+   web2.vm.hostname = "web2"
+
+   web2.vm.provision "shell", inline: <<-SHELL
+    mkdir -p ~root/.ssh
+    cp ~vagrant/.ssh/auth* ~root/.ssh
+    sudo sed -i 's/\PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+    sudo sed -i 's/KbdInteractiveAuthentication no/\#KbdInteractiveAuthentication no/g' /etc/ssh/sshd_config
+    systemctl restart sshd
+   SHELL
+
+   
+ end
+
 
  config.vm.define "log" do |log|
    log.vm.network "public_network", ip: "192.168.0.182"

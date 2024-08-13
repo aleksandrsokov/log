@@ -56,4 +56,15 @@
       name: rsyslog
       state: restarted
     when: ansible_hostname == "log"
+
+  - name: add line to the file web 2
+    lineinfile:
+      dest: /etc/rsyslog.conf
+      line: "*.* @@192.168.0.182:514"
+    when: ansible_hostname == "web2"  
       
+  - name: restart rsyslog service
+    service:
+      name:  rsyslog
+      state: restarted
+    when: ansible_hostname == "web2"
