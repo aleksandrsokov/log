@@ -31,7 +31,7 @@
       service: 
         name: rsyslog
         state: restarted
-  when: ansible_hostname == "log"
+    when: ansible_hostname == "log"
 
   - block: #===== configure web server =====
     - name: Install nginx
@@ -53,7 +53,7 @@
       service: 
         name: nginx
         state: restarted
-  when: ansible_hostname == "web"
+    when: ansible_hostname == "web"
 
   - block: #===== configure web server 2 =====
     - name: add line to the file web 2
@@ -65,4 +65,4 @@
       service:
         name:  rsyslog
         state: restarted
-  when: ansible_hostname == "web2"
+    when: ansible_hostname == "web2"
