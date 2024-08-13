@@ -39,7 +39,7 @@
       apt:
         name: nginx
         state: latest
-        supdate_cache: yes
+        update_cache: yes
     
     - name: edit /etc/nginx/nginx.conf
       lineinfile:
