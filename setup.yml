@@ -4,67 +4,65 @@
   become: yes
 
   tasks:
-  - name: Install nginx
-    apt:
-      name: nginx
-      state: latest
-      update_cache: yes
-    when: ansible_hostname == "web"
+  - block: #===== configure rsyslog server =====
+    - name: edit /etc/rsyslog.conf
+      lineinfile:
+        dest: /etc/rsyslog.conf
+        regex: '^#\s*{{ item.regex }}(.*)$'
+        line: '{{ item.replace }}'
+      loop:
+        - regex: module(load="imudp")
+          replace: module(load="imudp")
+        - regex: input(type="imudp" port="514")
+          replace: input(type="imudp" port="514")
+        - regex: module(load="imtcp")
+          replace: module(load="imtcp")
+        - regex: input(type="imtcp" port="514")
+          replace: input(type="imtcp" port="514")
+    
+    - name: add lines in /etc/rsyslog.conf
+      blockinfile:
+        path: /etc/rsyslog.conf
+        block: |
+          $template RemoteLogs,"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log"
+          *.* ?RemoteLogs
+    
+    - name: restart rsyslog service
+      service: 
+        name: rsyslog
+        state: restarted
+  when: ansible_hostname == "log"
 
-  - name: edit /etc/nginx/nginx.conf
-    lineinfile:
-      dest: /etc/nginx/nginx.conf
-      insertafter: 'error_log /var/log/nginx/error.log;'
-      line: "{{ item }}"
-    loop: 
-      - error_log syslog:server=192.168.0.182:514,tag=nginx_error;
-      - access_log syslog:server=192.168.0.182:514,tag=nginx_access,severity=info combined;
-    when: ansible_hostname == "web"
+  - block: #===== configure web server =====
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+    
+    - name: edit /etc/nginx/nginx.conf
+      lineinfile:
+        dest: /etc/nginx/nginx.conf
+        insertafter: 'error_log /var/log/nginx/error.log;'
+        line: "{{ item }}"
+      loop: 
+        - error_log syslog:server=192.168.0.182:514,tag=nginx_error;
+        - access_log syslog:server=192.168.0.182:514,tag=nginx_access,severity=info combined;
+    
+    - name: restart nginx service
+      service: 
+        name: nginx
+        state: restarted
+  when: ansible_hostname == "web"
 
-  - name: restart nginx service
-    service: 
-      name: nginx
-      state: restarted
-    when: ansible_hostname == "web"
-
-  - name: edit /etc/rsyslog.conf
-    lineinfile:
-      dest: /etc/rsyslog.conf
-      regex: '^#\s*{{ item.regex }}(.*)$'
-      line: '{{ item.replace }}'
-    loop:
-      - regex: module(load="imudp")
-        replace: module(load="imudp")
-      - regex: input(type="imudp" port="514")
-        replace: input(type="imudp" port="514")
-      - regex: module(load="imtcp")
-        replace: module(load="imtcp")
-      - regex: input(type="imtcp" port="514")
-        replace: input(type="imtcp" port="514")
-    when: ansible_hostname == "log" 
-
-  - name: add lines in /etc/rsyslog.conf
-    blockinfile:
-      path: /etc/rsyslog.conf
-      block: |
-        $template RemoteLogs,"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log"
-        *.* ?RemoteLogs
-    when: ansible_hostname == "log" 
-
-  - name: restart rsyslog service
-    service: 
-      name: rsyslog
-      state: restarted
-    when: ansible_hostname == "log"
-
-  - name: add line to the file web 2
-    lineinfile:
-      dest: /etc/rsyslog.conf
-      line: "*.* @@192.168.0.182:514"
-    when: ansible_hostname == "web2"  
-      
-  - name: restart rsyslog service
-    service:
-      name:  rsyslog
-      state: restarted
-    when: ansible_hostname == "web2"
+  - block: #===== configure web server 2 =====
+    - name: add line to the file web 2
+      lineinfile:
+        dest: /etc/rsyslog.conf
+        line: "*.* @@192.168.0.182:514"
+          
+    - name: restart rsyslog service
+      service:
+        name:  rsyslog
+        state: restarted
+  when: ansible_hostname == "web2"
