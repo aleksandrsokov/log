@@ -2,7 +2,6 @@
 - name: log
   hosts: all
   become: yes
-  vars_files: env/env.yml
  
   tasks:
   - name: Install nginx
