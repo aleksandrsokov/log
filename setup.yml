@@ -36,7 +36,8 @@
     when: ansible_hostname == "log" 
 
   - name: restart rsyslog service
-    service: rsyslog
-    state: restarted
+    service: 
+      name: rsyslog
+      state: restarted
     when: ansible_hostname == "log"
       
