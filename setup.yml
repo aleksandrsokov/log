@@ -19,7 +19,12 @@
     loop: 
       - error_log syslog:server=192.168.0.182:514,tag=nginx_error;
       - access_log syslog:server=192.168.0.182:514,tag=nginx_access,severity=info combined;
+    when: ansible_hostname == "web"
 
+  - name: restart nginx service
+    service: 
+      name: nginx
+      state: restarted
     when: ansible_hostname == "web"
 
   - name: edit /etc/rsyslog.conf
