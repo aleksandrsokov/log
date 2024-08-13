@@ -1,0 +1,44 @@
+---
+- name: PAM
+  hosts: all
+  become: yes
+  vars_files: env/env.yml
+ 
+  tasks:
+  - name: create group
+    group:
+      name: admin
+      state: present
+
+  - name: Create adm User
+    user:
+      name: otusadm
+      create_home: yes
+      uid: 1040
+      password: "{{ password | password_hash('sha512')}}"
+      group: admin
+      shell: /bin/bash
+      state: present
+
+  - name: Create User
+    user:
+      name: otus
+      create_home: yes
+      uid: 1041
+      password: "{{ password | password_hash('sha512')}}"
+      shell: /bin/bash
+      state: present
+
+  - name: add users to admin groupe
+    shell: usermod root -a -G admin && usermod vagrant -a -G admin
+
+  - name: copy sh file
+    copy: 
+      src: login.sh
+      dest: /usr/local/bin/login.sh
+      mode: +x
+
+  - name: edit pam file
+    lineinfile:
+       path: /etc/pam.d/sshd
+       line: auth required pam_exec.so debug /usr/local/bin/login.sh
